@@ -1,0 +1,128 @@
+\documentclass{article}
+\usepackage{graphicx,subfig}
+\usepackage{fancyhdr,amsmath,amssymb,amsthm,url,hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor} % for customizing colors (optional)
+\DeclareUnicodeCharacter{2212}{-}
+%----------------------- Macros and Definitions --------------------------
+\lstset{
+    language=Matlab,
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    breaklines=true,
+    breakatwhitespace=true
+}
+\newcommand{\ThirdAuther}{Instructor: Dr. M. H. Yassaee}
+\newcommand{\FourthAuther}{Mentor: Dr. M. R. Rahmani}
+\newcommand{\FirstAuther}{MohammadParsa Dini - std id: 400101204}
+\newcommand{\SecondAuther}{Erfan Moeini - std id: 402212293}
+\newcommand{\exerciseset}{Defense Against Gradient-Based Attacks via Randomized Smoothing }
+\fancypagestyle{plain}{}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RO,LE]{\sffamily\bfseries\large Sharif University of Technology}
+\fancyhead[LO,RE]{\sffamily\bfseries\large EE 25-841: Analysis of Prob. in High Dims.}
+\fancyfoot[LO,RE]{\sffamily\bfseries\large Project Proposal}
+\fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%-------------------------------- Title ----------------------------------
+\title{
+    \includegraphics[width=3cm]{logo.png} \\ % Adjust width as needed
+    Project Proposal \par \exerciseset
+}
+\author{\ThirdAuther \\ \FourthAuther \\ \FirstAuther \\ \SecondAuther }
+%--------------------------------- Text ----------------------------------
+\begin{document}
+\maketitle
+
+\section*{Abstract} 
+Adversarial training has emerged as a crucial technique in enhancing the robustness of machine learning models against adversarial attacks. This proposal outlines a project aimed at exploring two primary ideas: (1) Proof of Certified Robustness for alternative distributions such as the Poisson Distribution, and (2) Finding a Better Bound with Conditions on the Classifier. This study builds on the foundation laid by recent literature, including works such as \cite{cohen2024certified} and \cite{curse2024dimensionality}. Our goal is to develop novel methods for improving model robustness and to establish theoretical guarantees for their effectiveness. 
+
+\section*{Introduction} 
+Adversarial attacks pose significant challenges to the robustness of machine learning models. These attacks exploit vulnerabilities in the model by adding imperceptible perturbations to the input data, thereby causing the model to make incorrect predictions. Adversarial training is a defensive strategy designed to improve the robustness of models against such attacks. The objective of this project is to investigate new directions in adversarial training by focusing on certified robustness for alternative data distributions and improving robustness bounds under specific classifier conditions. 
+
+\section{Background, Related Work, and Motivation} 
+Several key studies have contributed to the understanding and development of adversarial training techniques. Mao et al. \cite{mao2023connecting} explored the connection between certified and adversarial training, highlighting methods for enhancing model robustness. Tramèr et al. \cite{tramèr2017space} examined the transferability of adversarial examples, while Shafahi et al. \cite{shafahi2018inevitable} discussed the inevitability of adversarial examples. FGSM (Fast Gradient Sign Method) and PGD (Projected Gradient Descent) are prominent techniques used in adversarial attacks, where FGSM is a white-box method that assumes access to the gradient of the loss function. Another approach involves adding noise to the gradients, thereby increasing the likelihood of model errors.
+
+In these methods, the goal is to solve the optimization problem:
+\begin{equation*}
+    \max_{\delta} \mathcal{L}(f_{\theta}(x + \delta), y)
+\end{equation*}
+where \( \mathcal{L} \) is the loss function, \( f_{\theta} \) represents the model with parameters \( \theta \), \( x \) is the input data, \( y \) is the true label, and \( \delta \) is the adversarial perturbation subject to a constraint, such as \( \|\delta\| \leq \epsilon \).
+
+Our project is motivated by the need to establish stronger theoretical guarantees for model robustness and to explore the efficacy of adversarial training under different distributional assumptions. Specifically, we aim to extend the concept of certified robustness to the Poisson distribution and to find better robustness bounds with additional classifier conditions. 
+
+\section{Project Ideas} 
+\subsection{Proof of Certified Robustness for Poisson Distribution} 
+The first idea is to provide a theoretical proof of certified robustness for models trained with data following a Poisson distribution. This involves extending the framework used for Gaussian distributions to accommodate the Poisson distribution, which is common in various real-world applications. We will derive certified robustness, within which adversarial perturbations do not affect model predictions, ensuring robustness.
+
+Mathematically, let \( X \) be the input data following a Poisson distribution with parameter \( \lambda \). The certified radius \(r\) is defined as the radius within which:
+\begin{equation*}
+    \forall \delta \, \text{with} \, \|\delta\| \leq r, \quad f_{\theta}(X + \delta) = f_{\theta}(X)
+\end{equation*}
+
+\subsection{Finding a Better Bound with Conditions on the Classifier} The goal is to derive tighter bounds on the robustness radius \(r_p^*\) by taking into account specific properties of the classifier being smoothed. Current bounds depend only on the smoothing distribution and the dimensionality \(d\), without leveraging the behavior of the classifier \cite{curse2024dimensionality}.
+$$
+r_p^* \leq \frac{\sigma}{2\sqrt{2}d^{\frac{1}{2}-\frac{1}{p}}} ( \frac{1}{\sqrt{1-p_1(x)}} + \frac{1}{\sqrt{p_2(x)}} )
+$$
+where $p_1(x)$ and
+$p_2(x)$ are the probabilities of the first and second most probable labels.
+
+\section*{Expected Outcomes} 
+Through this project, we expect to achieve the following outcomes: 
+\begin{itemize} 
+    \item A theoretical framework for certified robustness applicable to Poisson-distributed data.     
+    \item Classifier-dependent robustness bounds that improve certifiable robustness for randomized smoothing techniques.
+    %\item Practical recommendations for enhancing the robustness of machine learning models against adversarial attacks. 
+\end{itemize}
+
+
+\begin{thebibliography}{99}
+
+\bibitem{mao2023connecting}\label{ref1}
+Yuhao Mao, Mark Niklas Müller, Marc Fischer, and Martin Vechev.
+\textit{Connecting Certified and Adversarial Training}.
+Available at: \href{https://arxiv.org/abs/2305.04574}{arXiv:2305.04574}.
+
+\bibitem{tramèr2017space}\label{ref2}
+Florian Tramèr, Nicolas Papernot, Ian Goodfellow, Dan Boneh, and Patrick McDaniel.
+\textit{The Space of Transferable Adversarial Examples}.
+Available at: \href{https://arxiv.org/abs/1704.03453}{arXiv:1704.03453}.
+
+\bibitem{shafahi2018inevitable}\label{ref3}
+Ali Shafahi, W. Ronny Huang, Christoph Studer, Soheil Feizi, and Tom Goldstein.
+\textit{Are adversarial examples inevitable?}.
+In Proceedings of the 7th International Conference on Learning Representations (ICLR 2019).
+Available at: \href{https://arxiv.org/abs/1809.02104}{arXiv:1809.02104}.
+
+\bibitem{moosavi2017universal}\label{ref4}
+S. M. Moosavi-Dezfooli, A. Fawzi, O. Fawzi, and P. Frossard.
+\textit{Universal adversarial perturbations}.
+In Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR).
+Available at: \href{https://arxiv.org/abs/1704.08945}{arXiv:1704.08945}.
+
+\bibitem{cohen2024certified}\label{ref5}
+J. M. Cohen, E. Rosenfeld, and J. Z. Kolter.
+\textit{Certified Adversarial Robustness via Randomized Smoothing}.
+Available at: \href{https://arxiv.org/abs/2305.04574}{arXiv:2305.04574}.
+
+\bibitem{curse2024dimensionality}\label{ref6}
+Aounon Kumar, Alexander Levine, Tom Goldstein, and Soheil Feizi.
+\textit{The Curse of Dimensionality on Randomized Smoothing for Certifiable Robustness}.
+Available at: \href{https://arxiv.org/abs/2002.03239}{arXiv:2002.03239}.
+
+\end{thebibliography}
+
+
+\end{document}
