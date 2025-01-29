@@ -1,0 +1,8 @@
+This is my solution to the Take Home section of the HDP course
+
+----------------------------------
+# Student ID : 400101204         # 
+# Name : Mohammad Parsa Dini     #
+----------------------------------
+
+The pdf file is present at this directory.
