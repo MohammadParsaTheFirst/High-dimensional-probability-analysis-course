@@ -1,0 +1,443 @@
+%%%%%%%% ICML 2025 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+\documentclass{article}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\usepackage[accepted]{icml2025}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage[capitalize,noabbrev]{cleveref}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\usepackage[textsize=tiny]{todonotes}
+
+\icmltitlerunning{Submission and Formatting for Project of HDP course}
+% ------------------------------------------------------------
+\begin{document}
+
+\twocolumn[
+\icmltitle{
+Adversarial Training (Universal Adversarial Perturbation)
+}
+
+\icmlsetsymbol{equal}{*}
+\begin{icmlauthorlist}
+\icmlauthor{M. Parsa Dini}{yyy}
+\icmlauthor{Amin Kiani}{comp} 
+\icmlauthor{M. Reze Rahmani}{yyy}
+\icmlauthor{M. Hossein Yassaee}{yyy} \\ 
+\texttt{mp.dini@sharif.edu},\quad \texttt{mr.rahmani@sharif.edu}, \\
+\texttt{amin.kiani@sharif.edu},\quad \texttt{yassaee@sharif.edu}
+\end{icmlauthorlist}
+
+
+\icmlaffiliation{yyy}{EE Department of Sharif University of technology}
+\icmlaffiliation{comp}{CE Department of Sharif University of technology}
+
+\icmlkeywords{
+Adversarial Perturbation, High Dimensions, classifier attacks and robustness, 
+}
+
+\vskip 0.3in
+]
+
+
+\begin{abstract}
+In this paper, we explore an attack method for a deep neural network classifier and propose a technique to enhance its robustness. We then modify the attack algorithm and compare its performance against state-of-the-art adversarial attack methods. Additionally, we leverage tools from high-dimensional probability to establish a theoretical bound for the proposed setting. We introduce an algorithm, propose our own method, and evaluate the model’s accuracy through various measurements.
+\end{abstract}
+
+\section{Introduction}
+
+Deep neural networks have been crucial in many tasks, particularly in relatively simple applications such as image classification. However, these classifiers are vulnerable to adversarial attacks, which can manipulate their predictions. Most attacks fall under the category of white-box attacks, where the adversary has access to the model’s gradients and weights. Our goal is to find perturbed input vectors that, when fed into the model, lead to misclassification with high probability.
+
+
+\subsection{Literature/Formulation}
+Given an image space \( \chi \), an input image \( X \in \mathbb{R}^D \subset \chi \) from an image dataset \( \mathcal{D} = \{X^1, \dots, X^M\} \), and a label space \( \mathcal{C} =\{1,\dots, k\} \), we define a classifier \( f: \chi \to \mathcal{C} \) with accuracy at least \( 1-\delta \). Let \( y(X) \) denote the true label of the image \( X \). In other words, we have:
+
+\[
+\mathbb{P}[f(X) = y(X)] \geq 1-\delta.
+\]
+
+Furthermore, let \( H(c) \) denote the binary representation of label \( c \) in Hamming space. We aim to bound the difference in Hamming distance between the label of an image, \( f(X) \), and the label of its perturbed version, \( f(X+t) \), where \( t \) is a perturbation vector. Additionally, let \( d_{\mathcal{H}}(x,y) \) denote the Hamming distance between labels \( x \) and \( y \) and $\phi(c)$ is a function that maps the labels into its corresponding element in hamming space of labels.
+% ----------------------------------------------------------
+\section{Methodology}  
+
+\subsection{Randomized Smoothing in Adversarial Perturbation}
+
+Consider a classification problem from \( \mathbb{R}^D \) to a set of classes \( \mathcal{C} \). 
+Randomized smoothing is a method for constructing a new, smoothed classifier \( \hat{f} \) from an arbitrary base classifier \( f \). When queried at \( X \), the smoothed classifier \( \hat{f} \) returns the class that the base classifier \( f \) is most likely to output when \( X \) is perturbed by isotropic Gaussian noise:
+\[
+\hat{f}(X) = \arg\max_{c \in \mathcal{C}} P(f(X + t) = c)
+\]
+where \( \epsilon \sim \mathcal{N}(0, \sigma^2 I) \).
+The noise level \( \sigma \) is a hyperparameter of the smoothed classifier \( \hat{f} \) 
+that controls the robustness/accuracy tradeoff.
+\\
+Suppose that when the base classifier \( f \) classifies \( \mathcal{N}(X, \sigma^2I_D) \), the most probable class \( c_A \) is returned with probability \( \overline{P_A} \), and the “runner-up” class is returned with probability \( \underline{P_B} \). \( \overline{P_A} \) is a lower bound for \( \overline{P_A} \) and \( \underline{P_B} \) is a lower bound for \( \underline{P_B} \).
+\\
+\begin{theorem}
+Let \( f : \mathbb{R}^D \to \mathcal{C} \) be any deterministic or random function, and let \( t \sim \mathcal{N}(0, \sigma^2 I_D) \). 
+Let \( \hat{f} \) be defined as above. Suppose \( c_A \in \mathcal{C} \) and \( \overline{P_A}, \underline{P_B} \in [0, 1] \) satisfy:
+
+\[
+P(f(X + t) = c_A) \geq \overline{P_A} \geq \underline{P_B} \geq \max_{c \neq c_A} P(f(X + t) = c).
+\]
+
+Then, \( \hat{f}(X + \delta) = c_A \) for all \( \| \delta \|_2 \leq R^* \), where
+
+\[
+R^* = \frac{\sigma}{2} \left( \Phi^{-1}(\overline{P_A}) - \Phi^{-1}(\underline{P_B}) \right),
+\]
+
+and \( \Phi^{-1} \) is the inverse of the standard Gaussian cumulative distribution function (CDF). Furthermore, we will show that $\hat{f}$ is lipschitz with the constant $L_{\hat{f}} \leq \frac{\sqrt{D}}{\sigma}$.
+
+\end{theorem}
+Before Proving the theorem, the certified radius \( R^* \) goes to \( \infty \) as \( \overline{P_A} \to 1 \) and \( \underline{P_B} \to 0 \). This should sound reasonable: the Gaussian distribution is supported on all of \( \mathbb{R}^d \), so the only way that \( f(X + t) = c_A \) with probability 1 is if \( f = c_A \) almost everywhere. 
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Screenshot 2025-02-06 151651.png}
+    \caption{
+        Evaluating the smoothed classifier at an input \( x \). 
+        \\
+        \textbf{Left:} The decision regions of the base classifier \( f \) are shown in different colors. The dotted lines represent the level sets of the Gaussian distribution \( \mathcal{N}(x, \sigma^2 I) \).
+        \\
+        \textbf{Right:} The distribution \( f(\mathcal{N}(x, \sigma^2 I)) \). As discussed below, \( \overline{p_A} \) is a lower bound on the probability of the top class, and \( \underline{p_B} \) is an upper bound on the probability of each other class. Here, \( f(x) \) is represented as “blue”.
+    }
+    \label{fig:smoothed_classifier}
+\end{figure}
+
+
+
+\begin{proof}
+For the time being let $f:\mathbb{R^D}\to[0,1]$. Since the perturbed image is $ Z = X+t$, then we can say $P_T*P_X = P_{Z}$ which suggests that: $\hat{f}(X) = f(X)*g_\sigma(X)$ where $g_\sigma$ is the pdf of zero-centered gaussian with covariance $\sigma^2 I_D$.
+\\
+Furthermore, we have:
+
+\begin{align*}
+    \hat{f}(X) &= \mathbb{E}_{z \sim \mathcal{N}(0, I_D)}[f(X + \sigma z)] \\
+    &= \int_\mathbb{R^D} \frac{f(X + \sigma z)}{(2\pi)^{D/2}} \exp\left(-\frac{\|z\|_2^2}{2}\right) dz.
+\end{align*}
+
+Generally speaking, since convolution is a linear operator and since only g depends on $X$, therefore:
+\begin{align*}
+\nabla_X \hat{f}(X) &= \nabla_X (f * g_{\sigma}) \\
+&= f * \nabla_X g_{\sigma} \\
+&= \mathbb{E}_{z \sim \mathcal{N}(0, I_D)} \left[ f(X + \sigma z) \frac{z}{\sigma} \right]
+\end{align*}
+
+However, we know that the lipschitz constant of $\hat{f}$ is less than $|| \nabla_X f(X)||_2$, or in other words:
+$L_{\hat{f}} \leq || \nabla_X f(X)||_2$. Hence:
+\begin{equation*}
+    L_{\hat{f}} \leq \left\| \mathbb{E}_{z \sim \mathcal{N}(0, I_D)}[f(X + \sigma z)]  \frac{z}{\sigma} \right\|_2 \leq 
+    \frac{1}{\sigma} \mathbb{E}_{z \sim \mathcal{N}(0, I_D)}[\|z\|_2]
+\end{equation*}
+
+Now, Since \( h(x) = x^2 \) is a convex function, for a random variable \( X \), we have Jensen’s Inequality:
+
+\[
+h(\mathbb{E}[g(X)]) \leq \mathbb{E}[h(g(X))] \quad \text{or} \quad \mathbb{E}[g(X)] \leq \sqrt{\mathbb{E}[g^2(X)]}
+\]
+Therefore, we can deduce that: 
+\[
+ L_{\hat{f}} \leq 
+\frac{1}{\sigma} \mathbb{E}_{z \sim \mathcal{N}(0, I_D)}[\|z\|_2] \leq
+\frac{1}{\sigma} \sqrt{\mathbb{E}_{z \sim \mathcal{N}(0, I_D)}[\|z\|_2^2]} = \frac{\sqrt{D}}{\sigma}
+\]
+
+Thus, the lipschitz constant of $f$ is at least $\frac{\sqrt{D}}{\sigma}$. However what we proved is a general case where we have an interval. But in this context we had a finite set $\mathcal{C}$, which is ok since this finite set is a specific case of the whole case.
+
+After the dissemination of this work by \href{https://arxiv.org/abs/1902.02918}{Cohen et al}, a more general result was published in \href{https://examplelink.com}{Levine et al. (2019)}; \href{https://examplelink.com}{Salman et al. (2019)}: If \( h : \mathbb{R}^d \to [0,1] \) is a function and \( h \) is the “smoothed” version,
+
+\[
+h(X) = \mathbb{E}_{z \sim \mathcal{N}(0, \sigma^2I_D)}[h(X + \sigma z)],
+\]
+
+then the function \( X \mapsto 1(h(X)) \) is 1-Lipschitz. Theorem 1 can be proved by applying this result to the functions \( f_c(X) = 1[f(X) = c] \) for each class \( c \).
+
+\end{proof}
+
+Without loss of generality, let us assume that each image has only one channel and that each pixel is represented using 8 bits. When perturbing an image \( X \) with a perturbation vector \( t \), if we consider all possible perturbation vectors \( t \in \mathcal{V} \), we can observe that the space exhibits periodic behavior. This periodicity arises because adding a sufficiently large value to a pixel causes an overflow, effectively wrapping around within a finite set of values. Consequently, the image space can be viewed as a periodic space with a finite number of elements.
+
+We can visualize this image space using the depiction in Figure 2. Given this, we can partition the image space \( \chi \) into \( k = |\mathcal{C}| \) disjoint subsets as follows:
+
+\[
+\chi = \bigcup_{i=1}^{k} \psi_i
+\]
+
+where 
+
+\[
+\forall i \in \mathcal{C}: 
+\psi_i = \{ x \in \chi \mid f(x) = i \}.
+\]
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Screenshot 2025-02-06 151528.png}
+    \caption{
+    As shown, the image space \( \chi \) is partitioned as \( \bigcup_{i=1}^{k} \psi_i \), where \( \psi_i \cap \psi_j = \emptyset \) for all \( i \neq j \). Furthermore, the decision boundaries between different classes are clearly visible. It is also important to note that the image space \( \chi \) is finite.
+    }
+    \label{fig:cat}
+\end{figure}
+
+So this part is very tricky. We make a transformation from the label space to the hamming space such that for each class, the neighboring class that have boundary regions with eachother have hamming distance of 1.  \\
+
+\begin{assumption}
+Let $\tilde{t} = \phi(f(X_0)$, let's assume that he classifier $\hat{f}$ has the following property: for perturbed vectors $t,s$ and an image $X_0$ from image space $\chi$ :
+\begin{equation*}
+    d_\mathcal{H}( f(X+t), f(X+s) ) \leq c L_{\hat{f}} ||t-s||_p
+\end{equation*}
+\end{assumption}
+
+Thus, it is reasonable to introduce **Assumption 1**, which states that our trained classifier performs well in the sense that it rarely assigns a class to an image unless the class has a decision boundary in close proximity. As a result, when an image \( X_0 \) is perturbed by a vector \( t \), the Hamming distance between \( X_0 \) and its perturbed version \( X_0 + t \) is highly likely to be either *0* or *1*. This means that, with high probability, small perturbations will not significantly alter the classification outcome, reinforcing the robustness of our classifier under minor changes.
+\\
+Therefore, given the assumption stated above, we can now redefine the partitioning of the image space \( \chi \) in terms of the Hamming space, leading to the following new partitioning:  
+
+\[
+\chi = \bigcup_{i=1}^{k} \hat{\psi}_i
+\]
+
+where  
+
+\[
+\forall i \in \mathcal{C}:  
+\quad \hat{\psi}_i = \{ x \in \chi \mid \phi(f(x)) = \phi(i) \}.
+\]
+
+In this new space, the Hamming distance serves as a meaningful metric, as all images sharing the same label have a Hamming distance of **zero**, while images belonging to neighboring classes have a Hamming distance of **one**. This redefinition aligns well with our goal of measuring classification robustness within a discrete, structured framework.
+
+\begin{lemma}
+Let \( \mathcal{I} \) be an index space with metric $d(.,.)$. Then, for any \( \epsilon > 0 \), the following bound holds:
+
+\[
+\mathbb{E} \left[ \sup_{i \in \mathcal{I}} f_i \right] \leq \int_0^\infty \sqrt{\log N(\epsilon, d, \mathcal{I})} \, d\epsilon
+\]
+
+where \( N(\epsilon) \) denotes the covering number of the index space \( \mathcal{I} \) at scale \( \epsilon \), and the integral provides a bound on the growth of the supremum over the index space.
+\end{lemma}
+
+However, there is a better lemma that we are going to use:
+
+\begin{lemma}
+Let \( \mathcal{I} \) be an indexing set, and let \( d(.,.) \) be a metric. Let \( N(\epsilon, d, \mathcal{I}) \) be the covering number of \( \mathcal{I} \) at scale \( \epsilon \), i.e., the smallest number of \( \epsilon \)-balls required to cover \( \mathcal{I} \). Then we have:
+
+\[
+\mathbb{E} \left[ \sup_{i \in \mathcal{I}} f_i \right] \leq \sup_{\epsilon} \left( \epsilon \sqrt{\log N(\epsilon, d, \mathcal{I})} \right).
+\]
+
+\end{lemma}
+
+We also need another useful lemma:
+\begin{lemma}
+Assume that \( \mathcal{K} \) is the set of binary strings of length \( n \). Let \( \mathcal{N}(\mathcal{K}, d_\mathcal{H}, m) \) and 
+\( \mathcal{P}(\mathcal{K}, d_\mathcal{H}, m) \)
+denote the covering number and packing number of \( \mathcal{K} \) with respect to the Hamming distance \( d_\mathcal{H} \) at scale \( m \), respectively.
+Then we have :
+\begin{equation*}
+    \mathcal{N}(\mathcal{K},d_\mathcal{H}, m)\ \leq 
+    P(K, d_\mathcal{H}, m)  \leq \frac{2^n}{\left( \sum_{k=0}^{\left\lfloor \frac{m}{2} \right\rfloor} \binom{n}{k} \right)}  
+\end{equation*}
+\end{lemma}
+\begin{proof}
+
+Let \(\{a_1, \ldots, a_n\}\) where \(m = P(K, d_\mathcal{H}, m)\) be an \(m\)-packing for the set \(\mathcal{K} = \{0,1\}^n\). We can see that \(\{a_1, \ldots, a_n\}\) is an \(m\)-covering as well, otherwise there would be a point \(a_{n+1}\) that has a distance less than \(m\) with all \(\{a_i\}_{i=1}^n\), which can't happen due to the maximality of packing \(\{a_1, \ldots, a_n\}\). Which suggests:
+\begin{equation*}
+    \mathcal{N}(\mathcal{K},d_\mathcal{H}, m)\ \leq \mathcal{P}(\mathcal{K},d_\mathcal{H}, m)\
+\end{equation*}
+
+Now we consider an $m$-packing $\{a_1, \ldots, a_m\}$ of binary strings $\{0,1\}^n$ of length $n$. Now since each $a_i, a_j$ have at least $m$ different binary digits; if we take each $a_i$ and alter $l \leq \lfloor \frac{m}{2} \rfloor$ digits of $a_i$, we will still get distinct elements.
+
+$$
+\mathcal{C} = \{ x \; : \; d_h(x, a_i) \leq \lfloor \frac{m}{2} \rfloor ; \{a_i\}_{i=1}^{m} \; \text{is} \; m\text{-packing}\}.
+$$
+
+Since the total number of strings of length $n$ is $2^n$, we have:
+
+\[
+\left| \mathcal{C} \right| = P(K, d_\mathcal{H}, m) \cdot \left( \sum_{k=0}^{\left\lfloor \frac{m}{2} \right\rfloor} \binom{n}{k} \right) \leq 2^n = \left| K \right| \checkmark 
+\]
+
+Thus we get:
+
+\begin{equation*}
+    \mathcal{N}(\mathcal{K},d_\mathcal{H}, m)\ \leq 
+    P(K, d_\mathcal{H}, m)  \leq \frac{2^n}{\left( \sum_{k=0}^{\left\lfloor \frac{m}{2} \right\rfloor} \binom{n}{k} \right)}  
+\end{equation*}
+
+\end{proof}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Screenshot 2025-02-06 171213.png}
+    \caption{
+    The Visualization of $k$-dimensional hamming space and the vector $\tilde{t} \in \mathcal{T}$, where $\mathcal{T}$ is used as indexing space.
+    }
+    \label{fig:cat}
+\end{figure}
+
+Now using the lemmas above, we can easily prove that if we take the hamming difference of the detected label of the image $X$ and the detected label of the perturbed image $X+t$ as our random vector $Y_\tilde{t}$ we get:
+\begin{align*}
+    Y_{\tilde{t}} &= d_\mathcal{H}(\phi(f(X + t)), \phi(f(X))) = d_\mathcal{H}(v + \tilde{t}, v) \\
+    \text{where } \tilde{t} &= \phi(f(X + t)) - v \quad \text{and} \quad v = \phi(f(X))
+\end{align*}
+Then since the hamming distance is a metric and if we take our indexing space as $\mathcal{T}$, then from lemmas above, we can deduce that:
+\begin{align*}
+    \mathbb{E}_{X \sim P_X} \left[ d_\mathcal{H}(\phi(f(X + t)), \phi(f(X))) \right] \\
+    = \mathbb{E}_{X \sim P_X} \left[ d_\mathcal{H}(v + \tilde{t}, \tilde{t}) \right] \\
+    \leq \sup_{m} m \cdot \left( \frac{2^n}{ \sum_{k=0}^{\left\lfloor \frac{m}{2} \right\rfloor} \binom{n}{k}} \right)
+\end{align*}
+ which completes the proof and the bound we were looking for.
+
+% -------------------------------------------
+\section{Experiments \& Results}
+
+\section*{Conclusion}
+
+In this study, we have examined the literature on adversarial attack algorithms and the corresponding defense mechanisms, highlighting the complexity of addressing adversarial vulnerabilities in machine learning models. By simulating a variety of attack strategies, specifically utilizing p-norms, we were able to observe significant degradation in model performance, indicating the potency of adversarial perturbations in real-world applications. Our findings underscore the ongoing challenges in securing models against such attacks, suggesting that adversarial robustness remains a crucial area of research for ensuring the reliability and safety of machine learning systems.
+
+\section*{Future Work}
+
+There are several promising directions for future research in the domain of adversarial attacks and defenses. One potential avenue is to explore the relationship between the Wasserstein distance of perturbed and original distributions. By placing an upper bound on this distance, we can better understand the interplay between perturbation magnitude and model performance, leading to more effective defense strategies. Additionally, investigating the use of Gaussian smoothing distributions for mitigating adversarial effects could provide insights into novel defense mechanisms. This approach has the potential to improve model robustness by smoothing out high-frequency noise while preserving important features in the data. Finally, further studies could focus on adaptive adversarial attacks, where attackers dynamically adjust their strategies based on the defenses employed, in turn driving the development of more sophisticated and generalizable defense methods.
+
+
+\section*{Software and Data}
+We used these github repositories for 
+\href{https://github.com/mkazmier/pytorch-fgsm-simple}{FGSM}, 
+\href{https://github.com/LTS4/universal}{UAP},
+\href{https://github.com/divijgera/PGD-Attack-on-MNIST}{PGD} and 
+\href{https://github.com/cleverhans-lab/cleverhans}{L-BFGS} attacks on a DNN classifier trained on MNIST dataset. We also put our codes in this \href{https://github.com/MohammadParsaTheFirst/High-dimensional-probability-analysis-course}{github repository}.
+
+\section*{Acknowledgements}
+
+Many thanks to our mentor, Dr. Yassaee, for his invaluable guidance and support throughout this project. We also appreciate the insightful feedback and suggestions from our mentor, Dr. Rahmani, which significantly contributed to the improvement of this work. We also appreciate the team behind the \textit{Universal Adversarial Perturbations} and \textit{Certified Adversarial Robustness via Randomized Smoothing} paper for their contributions to this field.
+
+\section*{References}
+\begin{enumerate}
+    \item Jeremy M Cohen, Elan Rosenfeld, J. Zico Kolter, "Certified Adversarial Robustness via Randomized Smoothing," ICML 2019, \href{https://arxiv.org/abs/1902.02918}{arXiv:1902.02918}.
+    \item Seyed-Mohsen Moosavi-Dezfooli, Alhussein Fawzi, Omar Fawzi, "Universal Adversarial Perturbations," CVPR 2017, \href{https://arxiv.org/abs/1610.08401}{arXiv:1610.08401}.
+    \item Ashutosh Chaubey, Nikhil Agrawal, Kavya Barnwal, Keerat K. Guliani, Pramod Mehta, "Universal Adversarial Perturbations: A Survey," arXiv 2020, \href{https://arxiv.org/abs/2005.08087}{arXiv:2005.08087}.
+\end{enumerate}
+
+
+%\bibliographystyle{plain}
+%\bibliography{example_paper}
+
+\end{document}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\appendix
+\onecolumn
+\section{You \emph{can} have an appendix here.}
+
+You can have as much text here as you want. The main body must be at most $8$ pages long.
+For the final version, one more page can be added.
+If you want, you can use an appendix like this one.  
+
+The $\mathtt{\backslash onecolumn}$ command above can be kept in place if you prefer a one-column appendix, or can be removed if you prefer a two-column appendix.  Apart from this possible change, the style (font size, spacing, margins, page numbering, etc.) should be kept the same as the main body.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{proof}
+We aim to bound the expected supremum \( \mathbb{E} \left[ \sup_{i \in \mathcal{I}} f_i \right] \).
+
+To begin, consider a sequence of random variables \( \{X_i\}_{i \in \mathcal{I}} \), where each \( X_i \) represents the value of the metric \( d(i, \epsilon) \) for a fixed \( \epsilon \). We are interested in the expected value of the supremum of these random variables:
+
+\[
+\mathbb{E} \left[ \sup_{i \in \mathcal{I}} d(i, \epsilon) \right].
+\]
+
+By the definition of the covering number \( N(\epsilon) \), there exists a covering of \( \mathcal{I} \) with \( N(\epsilon) \) \( \epsilon \)-balls. Let the set \( \{B_j\}_{j=1}^{N(\epsilon)} \) be a collection of such \( \epsilon \)-balls, where each ball \( B_j \) has radius \( \epsilon \). By the properties of the covering number, we know that the set \( \mathcal{I} \) can be covered by at most \( N(\epsilon) \) of these balls.
+
+Now, define a random variable \( Y_j \) as the supremum over the elements within each ball \( B_j \):
+
+\[
+Y_j = \sup_{i \in B_j} f_i.
+\]
+
+Then, by the triangle inequality, we can bound the overall supremum as the maximum of the suprema over each ball:
+
+\[
+\sup_{i \in \mathcal{I}} d(i, \epsilon) \leq \max_{j} Y_j.
+\]
+
+Taking the expected value on both sides, we obtain:
+
+\[
+\mathbb{E} \left[ \sup_{i \in \mathcal{I}} d(i, \epsilon) \right] \leq \mathbb{E} \left[ \max_{j} Y_j \right].
+\]
+
+Next, we apply a standard result from concentration inequalities, such as McDiarmid's inequality, which bounds the expectation of the maximum of independent random variables. Specifically, for random variables \( Y_j \), we have:
+
+\[
+\mathbb{E} \left[ \max_{j} Y_j \right] \leq \sup_{\epsilon} \left( \epsilon \sqrt{\log N(\epsilon)} \right).
+\]
+
+This result follows from the fact that the covering number \( N(\epsilon) \) grows logarithmically with \( \epsilon \), and the supremum is scaled by \( \epsilon \) to account for the growth rate of the covering number.
+
+Thus, we have established the desired bound:
+
+\[
+\mathbb{E} \left[ \sup_{i \in \mathcal{I}} d(i, \epsilon) \right] \leq \sup_{\epsilon} \left( \epsilon \sqrt{\log N(\epsilon)} \right).
+\]
+
+\hfill \(\Box\)
+\end{proof}
